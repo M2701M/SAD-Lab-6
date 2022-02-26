@@ -1,0 +1,39 @@
+version: "3"
+services: 
+   
+  api:
+    build:
+      context: ./webApp
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_DB=counter
+    command: >
+      sh -c "python /code/counterProject/manage.py makemigrations && python /code/counterProject/manage.py migrate && python /code/counterProject/manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    secrets:
+      - postgres_user
+      - postgres_password
+    depends_on:
+      - data
+
+  data:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER_FILE=/run/secrets/postgres_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/postgres_password
+      - POSTGRES_DB=counter
+    volumes:
+      - postgre-sad-lab6:/data/db
+    secrets:
+      - postgres_user
+      - postgres_password
+
+volumes:
+  postgre-sad-lab6:
+
+secrets:
+  postgres_user:
+    file: postgres_user.txt
+  postgres_password:
+    file: postgres_password.txt
